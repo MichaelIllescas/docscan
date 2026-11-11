@@ -39,6 +39,16 @@ describe('documentRepository', () => {
     expect(await db.pages.count()).toBe(0)
   })
 
+  it('agrega páginas al final y conserva el orden', async () => {
+    const doc = await repo.create()
+    const img = (w: number) => ({ blob: new Blob(['x']), width: w, height: 10 })
+    await repo.addPages(doc.id, [img(1), img(2)])
+    await repo.addPages(doc.id, [img(3)])
+    const pages = await repo.getPages(doc.id)
+    expect(pages.map((p) => p.width)).toEqual([1, 2, 3])
+    expect((await repo.getById(doc.id))?.pageIds).toHaveLength(3)
+  })
+
   it('duplica el documento con copias de sus páginas', async () => {
     const doc = await repo.create()
     await db.pages.add(fakePage('p1', doc.id))

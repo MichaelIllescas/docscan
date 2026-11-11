@@ -11,7 +11,7 @@ PWA para escanear documentos con el celular y exportarlos a PDF. Todo se procesa
 |---|---|---|
 | 0 | Setup: Vite + React + TS, Tailwind, PWA, deploy | ✅ (falta deploy) |
 | 1 | Biblioteca + persistencia (Dexie), crear/renombrar/eliminar documento | ✅ |
-| 2 | Captura: cámara, galería, ráfaga | ⏳ |
+| 2 | Captura: cámara, galería, ráfaga | ✅ (falta probar cámara en celular) |
 | 3 | Detección de bordes + editor de esquinas + perspectiva (OpenCV worker) | ⏳ |
 | 4 | Edición de página: rotar, filtros, brillo/contraste | ⏳ |
 | 5 | Gestión de páginas: reordenar (drag), duplicar, eliminar, agregar | ⏳ |

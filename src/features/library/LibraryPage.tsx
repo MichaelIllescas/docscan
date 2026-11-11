@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { filterAndSortDocuments, type SortBy } from '../../domain/document'
 import { documentRepository } from '../../infrastructure/db'
 import { formatDate, pagesLabel } from '../../shared/formatDate'
+import { Thumbnail } from '../../shared/Thumbnail'
 
 const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: 'updated-desc', label: 'Más recientes' },
@@ -22,11 +23,6 @@ export function LibraryPage() {
     () => filterAndSortDocuments(documents ?? [], query, sortBy),
     [documents, query, sortBy],
   )
-
-  async function handleCreate() {
-    const doc = await documentRepository.create()
-    navigate(`/doc/${doc.id}`)
-  }
 
   return (
     <>
@@ -68,9 +64,7 @@ export function LibraryPage() {
                 to={`/doc/${doc.id}`}
                 className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm active:bg-slate-100"
               >
-                <div className="flex h-14 w-11 shrink-0 items-center justify-center rounded-md bg-slate-200 text-xs text-slate-500">
-                  PDF
-                </div>
+                <Thumbnail blob={doc.thumbnailBlob} />
                 <div className="min-w-0">
                   <p className="truncate font-medium">{doc.name}</p>
                   <p className="text-sm text-slate-500">
@@ -84,7 +78,7 @@ export function LibraryPage() {
       </main>
 
       <button
-        onClick={handleCreate}
+        onClick={() => navigate('/scan')}
         className="fixed right-4 bottom-[calc(1.5rem+env(safe-area-inset-bottom))] rounded-full bg-blue-600 px-6 py-4 font-semibold text-white shadow-lg active:bg-blue-700"
       >
         + Nuevo

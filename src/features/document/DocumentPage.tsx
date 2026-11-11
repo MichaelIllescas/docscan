@@ -4,12 +4,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { documentRepository } from '../../infrastructure/db'
 import { ConfirmDialog } from '../../shared/ConfirmDialog'
 import { formatDate, pagesLabel } from '../../shared/formatDate'
+import { Thumbnail } from '../../shared/Thumbnail'
 import { EditableName } from './EditableName'
 
 export function DocumentPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const doc = useLiveQuery(() => documentRepository.getById(id), [id], null)
+  const pages = useLiveQuery(() => documentRepository.getPages(id), [id])
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (doc === null) return null
@@ -48,9 +50,26 @@ export function DocumentPage() {
           {pagesLabel(doc.pageIds.length)} · Editado {formatDate(doc.updatedAt)}
         </p>
 
-        <div className="mt-10 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center text-slate-500">
-          Sin páginas todavía. La cámara llega en la fase 2.
-        </div>
+        {pages && pages.length === 0 && (
+          <div className="mt-6 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center text-slate-500">
+            Sin páginas todavía.
+          </div>
+        )}
+        <ol className="mt-4 grid grid-cols-3 gap-3">
+          {pages?.map((page, index) => (
+            <li key={page.id} className="flex flex-col items-center gap-1">
+              <Thumbnail blob={page.processedBlob} className="aspect-[3/4] w-full" />
+              <span className="text-xs text-slate-500">{index + 1}</span>
+            </li>
+          ))}
+        </ol>
+
+        <button
+          onClick={() => navigate(`/scan?doc=${id}`)}
+          className="mt-6 w-full rounded-lg bg-blue-600 py-3 font-semibold text-white active:bg-blue-700"
+        >
+          + Agregar páginas
+        </button>
 
         <div className="mt-8 flex gap-2">
           <button className="flex-1 rounded-lg bg-white py-3 font-medium shadow-sm active:bg-slate-100" onClick={handleDuplicate}>

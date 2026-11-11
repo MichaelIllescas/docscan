@@ -1,5 +1,5 @@
 import { createDocument, MAX_NAME_LENGTH, renameDocument, type ScanDocument } from '../../domain/document'
-import type { Page } from '../../domain/page'
+import { createPage, type CapturedImage, type Page } from '../../domain/page'
 import type { DocScanDatabase } from './database'
 
 export function createDocumentRepository(db: DocScanDatabase) {
@@ -24,6 +24,31 @@ export function createDocumentRepository(db: DocScanDatabase) {
       const renamed = renameDocument(await getOrThrow(id), name)
       await db.documents.put(renamed)
       return renamed
+    },
+
+    /** Páginas del documento en el orden definido por `pageIds`. */
+    async getPages(id: string): Promise<Page[]> {
+      const doc = await db.documents.get(id)
+      if (!doc) return []
+      const pages = await db.pages.bulkGet(doc.pageIds)
+      return pages.filter((p): p is Page => p !== undefined)
+    },
+
+    /** Agrega imágenes al final del documento. Si no tiene miniatura, usa `thumbnail`. */
+    async addPages(id: string, images: CapturedImage[], thumbnail?: Blob): Promise<ScanDocument> {
+      return db.transaction('rw', db.documents, db.pages, async () => {
+        const doc = await getOrThrow(id)
+        const pages = images.map((image) => createPage(id, image))
+        await db.pages.bulkAdd(pages)
+        const updated: ScanDocument = {
+          ...doc,
+          pageIds: [...doc.pageIds, ...pages.map((p) => p.id)],
+          thumbnailBlob: doc.thumbnailBlob ?? thumbnail,
+          updatedAt: Date.now(),
+        }
+        await db.documents.put(updated)
+        return updated
+      })
     },
 
     async remove(id: string): Promise<void> {
