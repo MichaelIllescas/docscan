@@ -27,7 +27,10 @@ export function LibraryPage() {
   return (
     <>
       <header className="sticky top-0 z-10 bg-blue-600 px-4 pt-[calc(1rem+env(safe-area-inset-top))] pb-3 text-white">
-        <h1 className="text-xl font-semibold">DocScan</h1>
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          <img src="/pwa-64x64.png" alt="" className="h-8 w-8 rounded-lg bg-white p-0.5" />
+          DocScan
+        </h1>
         <div className="mt-3 flex gap-2">
           <input
             type="search"

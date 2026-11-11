@@ -1,5 +1,5 @@
 import { createDocument, MAX_NAME_LENGTH, renameDocument, type ScanDocument } from '../../domain/document'
-import { createPage, type CapturedImage, type Page } from '../../domain/page'
+import { createPage, type Corners, type Page, type ProcessedCapture } from '../../domain/page'
 import type { DocScanDatabase } from './database'
 
 export function createDocumentRepository(db: DocScanDatabase) {
@@ -34,11 +34,13 @@ export function createDocumentRepository(db: DocScanDatabase) {
       return pages.filter((p): p is Page => p !== undefined)
     },
 
-    /** Agrega imágenes al final del documento. Si no tiene miniatura, usa `thumbnail`. */
-    async addPages(id: string, images: CapturedImage[], thumbnail?: Blob): Promise<ScanDocument> {
+    getPage: (pageId: string) => db.pages.get(pageId),
+
+    /** Agrega capturas al final del documento. Si no tiene miniatura, usa `thumbnail`. */
+    async addPages(id: string, captures: ProcessedCapture[], thumbnail?: Blob): Promise<ScanDocument> {
       return db.transaction('rw', db.documents, db.pages, async () => {
         const doc = await getOrThrow(id)
-        const pages = images.map((image) => createPage(id, image))
+        const pages = captures.map((capture) => createPage(id, capture))
         await db.pages.bulkAdd(pages)
         const updated: ScanDocument = {
           ...doc,
@@ -48,6 +50,21 @@ export function createDocumentRepository(db: DocScanDatabase) {
         }
         await db.documents.put(updated)
         return updated
+      })
+    },
+
+    /** Guarda un nuevo recorte. Si es la primera página, reemplaza la miniatura del documento. */
+    async updatePageCrop(pageId: string, corners: Corners, processed: Blob, thumbnail?: Blob): Promise<void> {
+      await db.transaction('rw', db.documents, db.pages, async () => {
+        const page = await db.pages.get(pageId)
+        if (!page) throw new Error('Página no encontrada')
+        await db.pages.update(pageId, { corners, processedBlob: processed })
+        const doc = await getOrThrow(page.documentId)
+        const isFirst = doc.pageIds[0] === pageId
+        await db.documents.update(doc.id, {
+          updatedAt: Date.now(),
+          ...(isFirst && thumbnail ? { thumbnailBlob: thumbnail } : {}),
+        })
       })
     },
 

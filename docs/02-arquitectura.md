@@ -92,3 +92,12 @@ captura → resize (≤2000px) → [worker] detectar contorno → usuario ajusta
 | Memoria en celulares | Resize temprano, liberar `ObjectURL`, procesar de a una página |
 | iOS borra el almacenamiento | `storage.persist()` + aviso para exportar |
 | Web Share con archivos falla en iOS | Fallback a descarga |
+
+## Carga de OpenCV.js
+- `opencv.js` (~10 MB) es un script UMD, no un módulo ES: Vite no lo puede empaquetar bien.
+- `npm install` lo copia a `public/vendor/opencv.js` (script `postinstall`, carpeta ignorada en git).
+- El worker (`src/infrastructure/vision/vision.worker.ts`) lo descarga con `fetch` y lo evalúa en su ámbito global la primera vez que se usa. La pantalla de cámara lo precarga al abrirse.
+- El Service Worker lo precachea, así la detección funciona offline.
+
+## Logo
+- Original: `design/logo-original.webp`. Icono sin texto (para tamaños chicos): `design/logo-icon.png`, fuente de `npm run generate-pwa-assets`.

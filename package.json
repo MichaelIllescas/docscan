@@ -9,9 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "node -e \"const fs=require('fs');fs.mkdirSync('public/vendor',{recursive:true});fs.copyFileSync('node_modules/@techstark/opencv-js/dist/opencv.js','public/vendor/opencv.js')\""
   },
   "dependencies": {
+    "@techstark/opencv-js": "^4.10.0-release.1",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^1.1.7",
     "react": "^19.1.0",

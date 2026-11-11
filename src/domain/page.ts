@@ -37,15 +37,27 @@ export function fullImageCorners(width: number, height: number): Corners {
   ]
 }
 
-export function createPage(documentId: string, image: CapturedImage): Page {
+/** Resultado de procesar una captura: la foto original, el recorte enderezado y sus esquinas. */
+export interface ProcessedCapture {
+  original: CapturedImage
+  processed: Blob
+  corners: Corners
+}
+
+export function unprocessedCapture(image: CapturedImage): ProcessedCapture {
+  return { original: image, processed: image.blob, corners: fullImageCorners(image.width, image.height) }
+}
+
+export function createPage(documentId: string, capture: ProcessedCapture): Page {
+  const { original } = capture
   return {
     id: crypto.randomUUID(),
     documentId,
-    originalBlob: image.blob,
-    processedBlob: image.blob,
-    width: image.width,
-    height: image.height,
-    corners: fullImageCorners(image.width, image.height),
+    originalBlob: original.blob,
+    processedBlob: capture.processed,
+    width: original.width,
+    height: original.height,
+    corners: capture.corners,
     rotation: 0,
     filter: 'original',
     brightness: 0,

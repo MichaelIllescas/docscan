@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import type { CapturedImage } from '../../domain/page'
+import type { CapturedImage, ProcessedCapture } from '../../domain/page'
 import { documentRepository } from '../../infrastructure/db'
+import { processCapture } from '../../infrastructure/vision/processCapture'
+import { warmUpVision } from '../../infrastructure/vision/visionClient'
 import { captureVideoFrame, createThumbnail, normalizeImageFile } from '../../shared/image'
 import { useObjectUrl } from '../../shared/useObjectUrl'
 import { useCamera } from './useCamera'
@@ -20,6 +22,9 @@ export function CapturePage() {
   const [captured, setCaptured] = useState<CapturedImage[]>([])
   const [busy, setBusy] = useState(false)
   const [flash, setFlash] = useState(false)
+  const [progress, setProgress] = useState('')
+
+  useEffect(() => warmUpVision(), [])
   const lastPreview = useObjectUrl(captured[captured.length - 1]?.blob)
 
   async function handleShutter() {
@@ -48,12 +53,18 @@ export function CapturePage() {
     if (!captured.length || busy) return
     setBusy(true)
     try {
+      const processed: ProcessedCapture[] = []
+      for (const [index, image] of captured.entries()) {
+        setProgress(`Procesando ${index + 1}/${captured.length}`)
+        processed.push(await processCapture(image))
+      }
       const docId = targetDocId ?? (await documentRepository.create()).id
-      const thumbnail = await createThumbnail(captured[0].blob)
-      await documentRepository.addPages(docId, captured, thumbnail)
+      const thumbnail = await createThumbnail(processed[0].processed)
+      await documentRepository.addPages(docId, processed, thumbnail)
       navigate(`/doc/${docId}`, { replace: true })
     } finally {
       setBusy(false)
+      setProgress('')
     }
   }
 
@@ -119,7 +130,7 @@ export function CapturePage() {
               {captured.length}
             </span>
           )}
-          <span className="mt-1 block text-xs">{busy ? 'Guardando…' : 'Listo'}</span>
+          <span className="mt-1 block text-xs">{progress || (busy ? 'Cargando…' : 'Listo')}</span>
         </button>
       </div>
     </div>

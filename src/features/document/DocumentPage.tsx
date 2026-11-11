@@ -57,9 +57,15 @@ export function DocumentPage() {
         )}
         <ol className="mt-4 grid grid-cols-3 gap-3">
           {pages?.map((page, index) => (
-            <li key={page.id} className="flex flex-col items-center gap-1">
-              <Thumbnail blob={page.processedBlob} className="aspect-[3/4] w-full" />
-              <span className="text-xs text-slate-500">{index + 1}</span>
+            <li key={page.id}>
+              <Link
+                to={`/doc/${id}/page/${page.id}/crop`}
+                aria-label={`Recortar página ${index + 1}`}
+                className="flex flex-col items-center gap-1"
+              >
+                <Thumbnail blob={page.processedBlob} className="aspect-[3/4] w-full object-contain" />
+                <span className="text-xs text-slate-500">{index + 1}</span>
+              </Link>
             </li>
           ))}
         </ol>

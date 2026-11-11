@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { Page } from '../../domain/page'
+import { fullImageCorners, unprocessedCapture, type Page } from '../../domain/page'
 import { DocScanDatabase } from './database'
 import { createDocumentRepository, type DocumentRepository } from './documentRepository'
 
@@ -41,12 +41,23 @@ describe('documentRepository', () => {
 
   it('agrega páginas al final y conserva el orden', async () => {
     const doc = await repo.create()
-    const img = (w: number) => ({ blob: new Blob(['x']), width: w, height: 10 })
+    const img = (w: number) => unprocessedCapture({ blob: new Blob(['x']), width: w, height: 10 })
     await repo.addPages(doc.id, [img(1), img(2)])
     await repo.addPages(doc.id, [img(3)])
     const pages = await repo.getPages(doc.id)
     expect(pages.map((p) => p.width)).toEqual([1, 2, 3])
     expect((await repo.getById(doc.id))?.pageIds).toHaveLength(3)
+  })
+
+  it('actualiza el recorte y la miniatura si es la primera página', async () => {
+    const doc = await repo.create()
+    const updated = await repo.addPages(doc.id, [unprocessedCapture({ blob: new Blob(['a']), width: 10, height: 10 })])
+    const pageId = updated.pageIds[0]
+    const corners = fullImageCorners(5, 5)
+    const thumb = new Blob(['t'])
+    await repo.updatePageCrop(pageId, corners, new Blob(['p']), thumb)
+    expect((await repo.getPage(pageId))?.corners).toEqual(corners)
+    expect((await repo.getById(doc.id))?.thumbnailBlob).toBeDefined()
   })
 
   it('duplica el documento con copias de sus páginas', async () => {
