@@ -1,4 +1,11 @@
-import { createDocument, MAX_NAME_LENGTH, renameDocument, type ScanDocument } from '../../domain/document'
+import {
+  createDocument,
+  insertAfter,
+  isSamePageSet,
+  MAX_NAME_LENGTH,
+  renameDocument,
+  type ScanDocument,
+} from '../../domain/document'
 import { createPage, type Page, type ProcessedCapture } from '../../domain/page'
 import type { DocScanDatabase } from './database'
 
@@ -68,6 +75,47 @@ export function createDocumentRepository(db: DocScanDatabase) {
           ...(isFirst && thumbnail ? { thumbnailBlob: thumbnail } : {}),
         })
       })
+    },
+
+    /** Guarda un nuevo orden. Debe contener exactamente las mismas páginas. */
+    async reorderPages(id: string, pageIds: string[]): Promise<ScanDocument> {
+      return db.transaction('rw', db.documents, async () => {
+        const doc = await getOrThrow(id)
+        if (!isSamePageSet(doc.pageIds, pageIds)) throw new Error('El nuevo orden no coincide con las páginas del documento')
+        const updated = { ...doc, pageIds: [...pageIds], updatedAt: Date.now() }
+        await db.documents.put(updated)
+        return updated
+      })
+    },
+
+    /** Copia la página y la inserta justo después de la original. Devuelve el id de la copia. */
+    async duplicatePage(pageId: string): Promise<string> {
+      return db.transaction('rw', db.documents, db.pages, async () => {
+        const page = await db.pages.get(pageId)
+        if (!page) throw new Error('Página no encontrada')
+        const doc = await getOrThrow(page.documentId)
+        const copy: Page = { ...page, id: crypto.randomUUID() }
+        await db.pages.add(copy)
+        await db.documents.update(doc.id, { pageIds: insertAfter(doc.pageIds, pageId, copy.id), updatedAt: Date.now() })
+        return copy.id
+      })
+    },
+
+    async removePage(pageId: string): Promise<ScanDocument> {
+      return db.transaction('rw', db.documents, db.pages, async () => {
+        const page = await db.pages.get(pageId)
+        if (!page) throw new Error('Página no encontrada')
+        const doc = await getOrThrow(page.documentId)
+        await db.pages.delete(pageId)
+        const updated: ScanDocument = { ...doc, pageIds: doc.pageIds.filter((p) => p !== pageId), updatedAt: Date.now() }
+        if (updated.pageIds.length === 0) delete updated.thumbnailBlob
+        await db.documents.put(updated)
+        return updated
+      })
+    },
+
+    async setThumbnail(id: string, thumbnail: Blob): Promise<void> {
+      await db.documents.update(id, { thumbnailBlob: thumbnail })
     },
 
     async remove(id: string): Promise<void> {

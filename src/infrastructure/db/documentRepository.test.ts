@@ -60,6 +60,41 @@ describe('documentRepository', () => {
     expect((await repo.getById(doc.id))?.thumbnailBlob).toBeDefined()
   })
 
+  describe('gestión de páginas', () => {
+    async function docWithPages(n: number) {
+      const doc = await repo.create()
+      const caps = Array.from({ length: n }, (_, i) => unprocessedCapture({ blob: new Blob([String(i)]), width: i + 1, height: 1 }))
+      return repo.addPages(doc.id, caps, new Blob(['thumb']))
+    }
+
+    it('reordena las páginas', async () => {
+      const doc = await docWithPages(3)
+      const reversed = [...doc.pageIds].reverse()
+      await repo.reorderPages(doc.id, reversed)
+      expect((await repo.getPages(doc.id)).map((p) => p.width)).toEqual([3, 2, 1])
+    })
+
+    it('rechaza un orden con páginas ajenas', async () => {
+      const doc = await docWithPages(2)
+      await expect(repo.reorderPages(doc.id, [doc.pageIds[0], 'otra'])).rejects.toThrow()
+    })
+
+    it('duplica una página justo después de la original', async () => {
+      const doc = await docWithPages(2)
+      const copyId = await repo.duplicatePage(doc.pageIds[0])
+      const ids = (await repo.getById(doc.id))!.pageIds
+      expect(ids).toEqual([doc.pageIds[0], copyId, doc.pageIds[1]])
+    })
+
+    it('elimina una página y quita la miniatura si no quedan páginas', async () => {
+      const doc = await docWithPages(1)
+      const updated = await repo.removePage(doc.pageIds[0])
+      expect(updated.pageIds).toEqual([])
+      expect(updated.thumbnailBlob).toBeUndefined()
+      expect(await db.pages.count()).toBe(0)
+    })
+  })
+
   it('duplica el documento con copias de sus páginas', async () => {
     const doc = await repo.create()
     await db.pages.add(fakePage('p1', doc.id))

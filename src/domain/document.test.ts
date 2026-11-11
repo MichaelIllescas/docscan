@@ -3,6 +3,9 @@ import {
   createDocument,
   defaultDocumentName,
   filterAndSortDocuments,
+  insertAfter,
+  isSamePageSet,
+  moveItem,
   renameDocument,
   sanitizeDocumentName,
   type ScanDocument,
@@ -32,6 +35,22 @@ describe('document domain', () => {
 
   it('rechaza nombres vacíos', () => {
     expect(() => renameDocument(createDocument(), '  /// ')).toThrow()
+  })
+
+  it('inserta después de un id', () => {
+    expect(insertAfter(['a', 'b', 'c'], 'b', 'x')).toEqual(['a', 'b', 'x', 'c'])
+    expect(insertAfter(['a'], 'z', 'x')).toEqual(['a', 'x'])
+  })
+
+  it('mueve elementos', () => {
+    expect(moveItem(['a', 'b', 'c', 'd'], 0, 2)).toEqual(['b', 'c', 'a', 'd'])
+    expect(moveItem(['a', 'b', 'c', 'd'], 3, 0)).toEqual(['d', 'a', 'b', 'c'])
+  })
+
+  it('compara conjuntos de páginas', () => {
+    expect(isSamePageSet(['a', 'b'], ['b', 'a'])).toBe(true)
+    expect(isSamePageSet(['a', 'b'], ['a', 'a'])).toBe(false)
+    expect(isSamePageSet(['a', 'b'], ['a', 'c'])).toBe(false)
   })
 
   it('filtra por nombre y ordena', () => {

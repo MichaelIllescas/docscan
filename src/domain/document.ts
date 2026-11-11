@@ -40,7 +40,28 @@ export function renameDocument(doc: ScanDocument, rawName: string, now: number =
   return { ...doc, name, updatedAt: now }
 }
 
-const byName = (a: ScanDocument, b: ScanDocument) => a.name.localeCompare(b.name, 'es', { numeric: true })
+/** Inserta `newId` inmediatamente después de `afterId` (al final si no lo encuentra). */
+export function insertAfter(ids: string[], afterId: string, newId: string): string[] {
+  const index = ids.indexOf(afterId)
+  if (index === -1) return [...ids, newId]
+  return [...ids.slice(0, index + 1), newId, ...ids.slice(index + 1)]
+}
+
+/** Mueve el elemento de la posición `from` a `to`. */
+export function moveItem<T>(items: T[], from: number, to: number): T[] {
+  const next = [...items]
+  const [moved] = next.splice(from, 1)
+  next.splice(to, 0, moved)
+  return next
+}
+
+export function isSamePageSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const set = new Set(a)
+  return b.every((id) => set.has(id)) && new Set(b).size === b.length
+}
+
+const byName =(a: ScanDocument, b: ScanDocument) => a.name.localeCompare(b.name, 'es', { numeric: true })
 
 const SORTERS: Record<SortBy, (a: ScanDocument, b: ScanDocument) => number> = {
   'updated-desc': (a, b) => b.updatedAt - a.updatedAt,
