@@ -4,6 +4,7 @@ import { CapturePage } from './features/capture/CapturePage'
 import { CropPage } from './features/crop/CropPage'
 import { DocumentPage } from './features/document/DocumentPage'
 import { LibraryPage } from './features/library/LibraryPage'
+import { PageEditorPage } from './features/page-editor/PageEditorPage'
 
 function Layout() {
   return (
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       { path: '/', element: <LibraryPage /> },
       { path: '/doc/:id', element: <DocumentPage /> },
       { path: '/doc/:id/page/:pageId/crop', element: <CropPage /> },
+      { path: '/doc/:id/page/:pageId/edit', element: <PageEditorPage /> },
       { path: '/scan', element: <CapturePage /> },
     ],
   },

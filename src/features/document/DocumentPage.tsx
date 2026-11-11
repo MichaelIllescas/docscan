@@ -59,8 +59,8 @@ export function DocumentPage() {
           {pages?.map((page, index) => (
             <li key={page.id}>
               <Link
-                to={`/doc/${id}/page/${page.id}/crop`}
-                aria-label={`Recortar página ${index + 1}`}
+                to={`/doc/${id}/page/${page.id}/edit`}
+                aria-label={`Editar página ${index + 1}`}
                 className="flex flex-col items-center gap-1"
               >
                 <Thumbnail blob={page.processedBlob} className="aspect-[3/4] w-full object-contain" />

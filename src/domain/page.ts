@@ -10,7 +10,11 @@ export type PageFilter = 'original' | 'grayscale' | 'bw' | 'enhanced'
 export interface Page {
   id: string
   documentId: string
+  /** Foto original (redimensionada). Permite volver a recortar. */
   originalBlob: Blob
+  /** Recorte enderezado, sin filtros ni rotación. Ausente en páginas viejas: usar `processedBlob`. */
+  croppedBlob?: Blob
+  /** Resultado final: recorte + rotación + filtro + brillo/contraste. */
   processedBlob: Blob
   width: number
   height: number
@@ -54,6 +58,7 @@ export function createPage(documentId: string, capture: ProcessedCapture): Page 
     id: crypto.randomUUID(),
     documentId,
     originalBlob: original.blob,
+    croppedBlob: capture.processed,
     processedBlob: capture.processed,
     width: original.width,
     height: original.height,

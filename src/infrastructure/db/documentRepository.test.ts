@@ -55,7 +55,7 @@ describe('documentRepository', () => {
     const pageId = updated.pageIds[0]
     const corners = fullImageCorners(5, 5)
     const thumb = new Blob(['t'])
-    await repo.updatePageCrop(pageId, corners, new Blob(['p']), thumb)
+    await repo.updatePage(pageId, { corners, processedBlob: new Blob(['p']) }, thumb)
     expect((await repo.getPage(pageId))?.corners).toEqual(corners)
     expect((await repo.getById(doc.id))?.thumbnailBlob).toBeDefined()
   })

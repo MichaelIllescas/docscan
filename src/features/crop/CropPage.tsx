@@ -5,6 +5,7 @@ import { fullImageCorners, type Corners, type Page } from '../../domain/page'
 import { documentRepository } from '../../infrastructure/db'
 import { detectCorners, warpImage } from '../../infrastructure/vision/visionClient'
 import { createThumbnail } from '../../shared/image'
+import { renderAdjusted } from '../../shared/renderPage'
 import { useObjectUrl } from '../../shared/useObjectUrl'
 import { CornerEditor } from './CornerEditor'
 
@@ -47,9 +48,10 @@ export function CropPage() {
     setBusy('save')
     try {
       const warped = await warpImage(page.originalBlob, corners)
-      const thumbnail = await createThumbnail(warped.blob)
-      await documentRepository.updatePageCrop(page.id, corners, warped.blob, thumbnail)
-      navigate(`/doc/${id}`, { replace: true })
+      const processed = await renderAdjusted(warped.blob, page)
+      const thumbnail = await createThumbnail(processed)
+      await documentRepository.updatePage(page.id, { corners, croppedBlob: warped.blob, processedBlob: processed }, thumbnail)
+      navigate(`/doc/${id}/page/${pageId}/edit`, { replace: true })
     } catch {
       setMessage('No se pudo recortar la imagen. Probá de nuevo.')
       setBusy('')

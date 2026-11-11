@@ -1,6 +1,8 @@
 import { createDocument, MAX_NAME_LENGTH, renameDocument, type ScanDocument } from '../../domain/document'
-import { createPage, type Corners, type Page, type ProcessedCapture } from '../../domain/page'
+import { createPage, type Page, type ProcessedCapture } from '../../domain/page'
 import type { DocScanDatabase } from './database'
+
+export type PageChanges = Partial<Omit<Page, 'id' | 'documentId' | 'originalBlob' | 'width' | 'height'>>
 
 export function createDocumentRepository(db: DocScanDatabase) {
   async function getOrThrow(id: string): Promise<ScanDocument> {
@@ -53,12 +55,12 @@ export function createDocumentRepository(db: DocScanDatabase) {
       })
     },
 
-    /** Guarda un nuevo recorte. Si es la primera página, reemplaza la miniatura del documento. */
-    async updatePageCrop(pageId: string, corners: Corners, processed: Blob, thumbnail?: Blob): Promise<void> {
+    /** Guarda cambios de una página (recorte o ajustes). Si es la primera, reemplaza la miniatura del documento. */
+    async updatePage(pageId: string, changes: PageChanges, thumbnail?: Blob): Promise<void> {
       await db.transaction('rw', db.documents, db.pages, async () => {
         const page = await db.pages.get(pageId)
         if (!page) throw new Error('Página no encontrada')
-        await db.pages.update(pageId, { corners, processedBlob: processed })
+        await db.pages.update(pageId, changes)
         const doc = await getOrThrow(page.documentId)
         const isFirst = doc.pageIds[0] === pageId
         await db.documents.update(doc.id, {
