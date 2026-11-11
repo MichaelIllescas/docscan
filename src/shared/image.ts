@@ -52,6 +52,16 @@ export function captureVideoFrame(video: HTMLVideoElement): Promise<CapturedImag
   return drawScaled(video, video.videoWidth, video.videoHeight, MAX_IMAGE_SIDE)
 }
 
+/** Recomprime una imagen a JPEG con el tamaño máximo y la calidad indicados. */
+export async function compressJpeg(blob: Blob, maxSide: number, quality: number): Promise<CapturedImage> {
+  const bitmap = await createImageBitmap(blob)
+  try {
+    return await drawScaled(bitmap, bitmap.width, bitmap.height, maxSide, quality)
+  } finally {
+    bitmap.close()
+  }
+}
+
 export async function createThumbnail(blob: Blob): Promise<Blob> {
   const bitmap = await createImageBitmap(blob)
   try {

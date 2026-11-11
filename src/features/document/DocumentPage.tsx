@@ -105,9 +105,21 @@ export function DocumentPage() {
           />
         )}
 
+        {doc.pageIds.length > 0 && (
+          <button
+            onClick={() => navigate(`/doc/${id}/export`)}
+            className="mt-6 w-full rounded-lg bg-blue-600 py-3 font-semibold text-white active:bg-blue-700"
+          >
+            Exportar PDF
+          </button>
+        )}
         <button
           onClick={() => navigate(`/scan?doc=${id}`)}
-          className="mt-6 w-full rounded-lg bg-blue-600 py-3 font-semibold text-white active:bg-blue-700"
+          className={`w-full rounded-lg py-3 font-semibold ${
+            doc.pageIds.length > 0
+              ? 'mt-2 bg-white text-blue-600 shadow-sm active:bg-slate-100'
+              : 'mt-6 bg-blue-600 text-white active:bg-blue-700'
+          }`}
         >
           + Agregar páginas
         </button>

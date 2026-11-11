@@ -15,7 +15,7 @@ PWA para escanear documentos con el celular y exportarlos a PDF. Todo se procesa
 | 3 | Detección de bordes + editor de esquinas + perspectiva (OpenCV worker) | ✅ |
 | 4 | Edición de página: rotar, filtros, brillo/contraste | ✅ |
 | 5 | Gestión de páginas: reordenar (drag), duplicar, eliminar, agregar | ✅ |
-| 6 | Exportar PDF (tamaño, calidad) + compartir / descargar / JPG | ⏳ |
+| 6 | Exportar PDF (tamaño, calidad) + compartir / descargar / JPG | ✅ (falta probar compartir en celular) |
 | 7 | Pulido: offline, aviso de actualización, invitación a instalar (Android + iOS), almacenamiento persistente, pruebas en celular | ⏳ |
 
 ## Desarrollo
