@@ -1,0 +1,51 @@
+# DocScan en Hostinger (Apache)
+# Copiar este archivo como ".htaccess" en public_html, al lado de la carpeta "dist".
+# Sirve el contenido de dist/ como si estuviera en la raíz, sin mover archivos.
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Forzar HTTPS (la cámara y el service worker lo exigen)
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Archivos que existen dentro de dist/ (JS, CSS, íconos, sw.js, opencv.js...)
+  RewriteCond %{REQUEST_URI} !^/dist/
+  RewriteCond %{DOCUMENT_ROOT}/dist%{REQUEST_URI} -f
+  RewriteRule ^(.*)$ dist/$1 [L]
+
+  # Rutas de la app (/doc/123, /scan, ...) -> index.html
+  RewriteCond %{REQUEST_URI} !^/dist/
+  RewriteRule ^ dist/index.html [L]
+</IfModule>
+
+# Tipos de archivo que Apache a veces no conoce
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType application/wasm .wasm
+  AddType font/woff2 .woff2
+</IfModule>
+
+# Compresión: opencv.js pasa de ~10 MB a ~2,5 MB
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript text/javascript application/json application/manifest+json application/xml image/svg+xml application/wasm
+</IfModule>
+
+<IfModule mod_headers.c>
+  # El service worker y el HTML nunca se cachean: así llegan las actualizaciones
+  <FilesMatch "^(sw\.js|index\.html|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+
+  # Archivos con hash en el nombre: caché por un año
+  <If "%{REQUEST_URI} =~ m#^/(dist/)?assets/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

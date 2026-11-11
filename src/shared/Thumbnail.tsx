@@ -1,3 +1,4 @@
+import { FileText } from 'lucide-react'
 import { useObjectUrl } from './useObjectUrl'
 
 interface ThumbnailProps {
@@ -5,16 +6,24 @@ interface ThumbnailProps {
   className?: string
 }
 
-export function Thumbnail({ blob, className = 'h-14 w-11' }: ThumbnailProps) {
+export function Thumbnail({ blob, className = 'h-16 w-12' }: ThumbnailProps) {
   const url = useObjectUrl(blob)
 
   if (!url) {
     return (
-      <div className={`${className} flex shrink-0 items-center justify-center rounded-md bg-slate-200 text-xs text-slate-500`}>
-        PDF
+      <div className={`${className} flex shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400 ring-1 ring-slate-200`}>
+        <FileText size={20} />
       </div>
     )
   }
 
-  return <img src={url} alt="" className={`${className} shrink-0 rounded-md bg-white object-cover shadow-sm`} />
+  return (
+    <img
+      src={url}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      className={`${className} shrink-0 rounded-lg bg-white object-cover ring-1 ring-slate-900/10`}
+    />
+  )
 }

@@ -1,4 +1,6 @@
+import { Maximize, ScanSearch, TriangleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { EditorHeader, ToolButton } from '../../shared/ui/EditorChrome'
 import { useNavigate, useParams } from 'react-router-dom'
 import { isConvexQuad } from '../../domain/geometry'
 import { fullImageCorners, type Corners, type Page } from '../../domain/page'
@@ -59,16 +61,14 @@ export function CropPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-neutral-900 text-white">
-      <header className="flex items-center justify-between px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3">
-        <button onClick={() => navigate(-1)} className="px-2 py-1">
-          Cancelar
-        </button>
-        <h1 className="font-semibold">Recortar</h1>
-        <button onClick={handleSave} disabled={!corners || busy !== ''} className="px-2 py-1 font-semibold text-blue-400 disabled:opacity-40">
-          {busy === 'save' ? 'Guardando…' : 'Guardar'}
-        </button>
-      </header>
+    <div className="fixed inset-0 flex flex-col bg-slate-950 text-white">
+      <EditorHeader
+        title="Recortar"
+        onCancel={() => navigate(-1)}
+        onSave={handleSave}
+        saving={busy === 'save'}
+        saveDisabled={!corners || busy !== ''}
+      />
 
       <div className="min-h-0 flex-1 p-4">
         {page && corners && imageUrl && (
@@ -85,19 +85,27 @@ export function CropPage() {
         )}
       </div>
 
-      {message && <p className="px-6 pb-2 text-center text-sm text-amber-300">{message}</p>}
+      {message && (
+        <p className="mx-6 mb-2 flex items-center justify-center gap-2 rounded-xl bg-amber-400/10 px-3 py-2 text-center text-sm text-amber-300">
+          <TriangleAlert size={16} className="shrink-0" />
+          {message}
+        </p>
+      )}
 
-      <div className="flex justify-center gap-3 px-4 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-        <button onClick={handleDetect} disabled={!page || busy !== ''} className="rounded-lg bg-white/15 px-4 py-2 text-sm disabled:opacity-40">
-          {busy === 'detect' ? 'Detectando…' : 'Detectar bordes'}
-        </button>
-        <button
+      <div className="flex justify-center gap-6 px-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <ToolButton
+          icon={ScanSearch}
+          label="Detectar bordes"
+          onClick={handleDetect}
+          disabled={!page || busy !== ''}
+          busy={busy === 'detect'}
+        />
+        <ToolButton
+          icon={Maximize}
+          label="Imagen completa"
           onClick={() => page && setCorners(fullImageCorners(page.width, page.height))}
           disabled={!page || busy !== ''}
-          className="rounded-lg bg-white/15 px-4 py-2 text-sm disabled:opacity-40"
-        >
-          Imagen completa
-        </button>
+        />
       </div>
     </div>
   )

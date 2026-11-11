@@ -1,3 +1,4 @@
+import { Pencil } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { MAX_NAME_LENGTH, sanitizeDocumentName } from '../../domain/document'
 
@@ -27,8 +28,13 @@ export function EditableName({ name, onSave }: EditableNameProps) {
 
   if (!editing) {
     return (
-      <button onClick={startEditing} className="min-w-0 flex-1 truncate text-left text-lg font-semibold" title="Renombrar">
-        {name} <span className="text-sm font-normal opacity-70">✎</span>
+      <button
+        onClick={startEditing}
+        className="group flex min-w-0 flex-1 items-center gap-2 rounded-lg py-1 text-left active:opacity-70"
+        title="Renombrar"
+      >
+        <span className="truncate text-lg font-semibold text-slate-900">{name}</span>
+        <Pencil size={15} className="shrink-0 text-slate-400" />
       </button>
     )
   }
@@ -49,7 +55,7 @@ export function EditableName({ name, onSave }: EditableNameProps) {
           setEditing(false)
         }
       }}
-      className="min-w-0 flex-1 rounded-lg bg-white px-3 py-1.5 text-lg text-slate-900"
+      className="min-w-0 flex-1 rounded-xl bg-slate-100 px-3 py-1.5 text-lg font-semibold text-slate-900 outline-none ring-2 ring-brand-500"
     />
   )
 }

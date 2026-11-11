@@ -2,17 +2,90 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- SEO -->
+    <title>DocScan · Escáner de documentos a PDF gratis y sin internet</title>
+    <meta
+      name="description"
+      content="Escaneá documentos con la cámara del celular y convertilos a PDF. Detecta bordes, endereza la hoja, aplica filtros y comparte por WhatsApp o mail. Gratis, privado y sin conexión."
+    />
+    <meta name="keywords" content="escáner de documentos, escanear a PDF, convertir foto a PDF, escáner gratis, app escáner, PDF desde el celular" />
+    <meta name="author" content="DocScan" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="__SITE_URL__/" />
+
+    <!-- Tarjeta para WhatsApp, Facebook, LinkedIn, Telegram (Open Graph) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DocScan" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="DocScan · Escaneá documentos y convertilos a PDF" />
+    <meta property="og:description" content="Detecta bordes, endereza la hoja y la convierte en PDF. Gratis, privado y funciona sin internet." />
+    <meta property="og:image" content="__SITE_URL__/og-image.png" />
+    <meta property="og:image:secure_url" content="__SITE_URL__/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Logo de DocScan: escáner de documentos a PDF" />
+
+    <!-- Tarjeta para X / Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DocScan · Escaneá documentos y convertilos a PDF" />
+    <meta name="twitter:description" content="Detecta bordes, endereza la hoja y la convierte en PDF. Gratis, privado y sin internet." />
+    <meta name="twitter:image" content="__SITE_URL__/og-image.png" />
+    <meta name="twitter:image:alt" content="Logo de DocScan: escáner de documentos a PDF" />
+
+    <!-- App / PWA -->
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/pwa-64x64.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#2563eb" />
+    <meta name="theme-color" content="#1d64f1" />
+    <meta name="application-name" content="DocScan" />
+    <meta name="apple-mobile-web-app-title" content="DocScan" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>DocScan</title>
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Datos estructurados para buscadores -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "DocScan",
+        "url": "__SITE_URL__/",
+        "image": "__SITE_URL__/og-image.png",
+        "description": "Escáner de documentos que convierte fotos en PDF directamente en el navegador. Detecta bordes, corrige la perspectiva, aplica filtros y funciona sin conexión.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Android, iOS, Windows, macOS",
+        "browserRequirements": "Requiere un navegador moderno con JavaScript",
+        "inLanguage": "es",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "Escaneo con la cámara y desde la galería",
+          "Detección automática de bordes y corrección de perspectiva",
+          "Filtros: mejorado, escala de grises y blanco y negro",
+          "Reordenar, duplicar y eliminar páginas",
+          "Exportar a PDF (A4, Carta o ajustado) y a JPG",
+          "Funciona sin internet; los documentos quedan en el dispositivo"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main style="font-family: system-ui, sans-serif; max-width: 36rem; margin: 3rem auto; padding: 0 1rem">
+        <h1>DocScan · Escáner de documentos a PDF</h1>
+        <p>
+          Escaneá documentos con la cámara del celular y convertilos a PDF: detecta los bordes, endereza la hoja y aplica filtros.
+          Gratis, privado y sin conexión.
+        </p>
+        <p>Para usar DocScan necesitás activar JavaScript en tu navegador.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

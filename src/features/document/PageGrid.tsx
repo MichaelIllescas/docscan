@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core'
 import { rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { MoreHorizontal } from 'lucide-react'
 import { useRef } from 'react'
 import type { Page } from '../../domain/page'
 import { Thumbnail } from '../../shared/Thumbnail'
@@ -45,7 +46,7 @@ export function PageGrid({ pages, onReorder, onOpen, onMenu }: PageGridProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={pages.map((p) => p.id)} strategy={rectSortingStrategy}>
-        <ol className="mt-4 grid grid-cols-3 gap-3">
+        <ol className="grid grid-cols-3 gap-3">
           {pages.map((page, index) => (
             <SortablePage
               key={page.id}
@@ -75,7 +76,7 @@ function SortablePage({ page, index, onOpen, onMenu }: SortablePageProps) {
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`relative touch-manipulation select-none ${isDragging ? 'z-10 scale-105 opacity-90 drop-shadow-xl' : ''}`}
+      className={`relative touch-manipulation select-none ${isDragging ? 'z-10' : ''}`}
     >
       <div
         {...attributes}
@@ -84,17 +85,21 @@ function SortablePage({ page, index, onOpen, onMenu }: SortablePageProps) {
         aria-label={`Página ${index + 1}. Tocá para editar, mantené presionado para mover`}
         onClick={onOpen}
         onContextMenu={(e) => e.preventDefault()}
-        className="flex flex-col items-center gap-1 [-webkit-touch-callout:none]"
+        className={`overflow-hidden rounded-xl bg-white p-1.5 shadow-card transition-[box-shadow,transform] duration-200 [-webkit-touch-callout:none] ${
+          isDragging ? 'scale-105 shadow-2xl ring-2 ring-brand-500' : ''
+        }`}
       >
-        <Thumbnail blob={page.processedBlob} className="pointer-events-none aspect-[3/4] w-full object-contain" />
-        <span className="text-xs text-slate-500">{index + 1}</span>
+        <Thumbnail blob={page.processedBlob} className="pointer-events-none aspect-[3/4] w-full rounded-lg object-contain ring-0" />
       </div>
+      <span className="absolute bottom-3 left-3 rounded-md bg-slate-900/70 px-1.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur">
+        {index + 1}
+      </span>
       <button
         onClick={onMenu}
         aria-label={`Opciones de la página ${index + 1}`}
-        className="absolute top-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-sm text-white"
+        className="absolute top-2.5 right-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-sm backdrop-blur active:bg-white"
       >
-        ⋯
+        <MoreHorizontal size={16} />
       </button>
     </li>
   )

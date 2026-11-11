@@ -10,15 +10,18 @@
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator",
     "test": "vitest run",
-    "postinstall": "node -e \"const fs=require('fs');fs.mkdirSync('public/vendor',{recursive:true});fs.copyFileSync('node_modules/@techstark/opencv-js/dist/opencv.js','public/vendor/opencv.js')\""
+    "postinstall": "node -e \"const fs=require('fs');fs.mkdirSync('public/vendor',{recursive:true});fs.copyFileSync('node_modules/@techstark/opencv-js/dist/opencv.js','public/vendor/opencv.js')\"",
+    "generate-og-image": "node scripts/generate-og-image.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@fontsource-variable/inter": "^5.3.0",
     "@techstark/opencv-js": "^4.10.0-release.1",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^1.1.7",
+    "lucide-react": "^0.460.0",
     "pdf-lib": "^1.17.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -31,6 +34,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.9",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vite-pwa/assets-generator": "^1.0.4",
@@ -47,5 +51,14 @@
     "vite": "^6.3.5",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^3.2.7"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "description": "Escaneá documentos con la cámara y convertilos a PDF. PWA offline y privada.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichaelIllescas/docscan.git"
   }
 }

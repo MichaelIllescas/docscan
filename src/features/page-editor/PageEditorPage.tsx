@@ -1,12 +1,15 @@
+import { Contrast, Crop, RotateCcw, RotateCw, Sun, Undo2, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { DEFAULT_ADJUSTMENTS, rotate, type PageAdjustments } from '../../domain/adjustments'
 import type { Page, PageFilter } from '../../domain/page'
 import { documentRepository } from '../../infrastructure/db'
 import { createThumbnail } from '../../shared/image'
 import { renderAdjusted, renderToCanvas } from '../../shared/renderPage'
+import { EditorHeader, ToolButton } from '../../shared/ui/EditorChrome'
 
 const PREVIEW_MAX_SIDE = 1000
+const FILTER_THUMB_SIDE = 140
 
 const FILTERS: { value: PageFilter; label: string }[] = [
   { value: 'original', label: 'Original' },
@@ -14,6 +17,8 @@ const FILTERS: { value: PageFilter; label: string }[] = [
   { value: 'grayscale', label: 'Grises' },
   { value: 'bw', label: 'B/N' },
 ]
+
+type Tab = 'filters' | 'adjust'
 
 const pickAdjustments = (p: Page): PageAdjustments => ({
   rotation: p.rotation,
@@ -30,6 +35,7 @@ export function PageEditorPage() {
   const [source, setSource] = useState<ImageBitmap | null>(null)
   const [adj, setAdj] = useState<PageAdjustments>(DEFAULT_ADJUSTMENTS)
   const [saving, setSaving] = useState(false)
+  const [tab, setTab] = useState<Tab>('filters')
 
   useEffect(() => {
     let bitmap: ImageBitmap | null = null
@@ -74,60 +80,109 @@ export function PageEditorPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-neutral-900 text-white">
-      <header className="flex items-center justify-between px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3">
-        <button onClick={() => navigate(-1)} className="px-2 py-1">
-          Cancelar
-        </button>
-        <h1 className="font-semibold">Editar página</h1>
-        <button onClick={handleSave} disabled={!page || saving} className="px-2 py-1 font-semibold text-blue-400 disabled:opacity-40">
-          {saving ? 'Guardando…' : 'Guardar'}
-        </button>
-      </header>
+    <div className="fixed inset-0 flex flex-col bg-slate-950 text-white">
+      <EditorHeader title="Editar página" onCancel={() => navigate(-1)} onSave={handleSave} saving={saving} saveDisabled={!page} />
 
       <div className="flex min-h-0 flex-1 items-center justify-center p-4">
-        <canvas ref={canvasRef} className="max-h-full max-w-full bg-white object-contain shadow-lg" />
+        <canvas ref={canvasRef} className="max-h-full max-w-full rounded-sm bg-white object-contain shadow-2xl shadow-black/60" />
       </div>
 
-      <div className="space-y-4 px-4 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-        <div className="flex justify-center gap-2">
-          {FILTERS.map((f) => (
+      <div className="rounded-t-3xl bg-slate-900 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <div className="mx-auto mb-3 flex w-fit rounded-full bg-white/5 p-1 text-sm font-medium">
+          {(
+            [
+              ['filters', 'Filtros'],
+              ['adjust', 'Ajustes'],
+            ] as const
+          ).map(([value, label]) => (
             <button
-              key={f.value}
-              onClick={() => update({ filter: f.value })}
-              aria-pressed={adj.filter === f.value}
-              className={`rounded-full px-3 py-1.5 text-sm ${adj.filter === f.value ? 'bg-blue-600 font-semibold' : 'bg-white/15'}`}
+              key={value}
+              onClick={() => setTab(value)}
+              aria-pressed={tab === value}
+              className={`rounded-full px-5 py-1.5 transition-colors ${tab === value ? 'bg-white text-slate-900' : 'text-white/60'}`}
             >
-              {f.label}
+              {label}
             </button>
           ))}
         </div>
 
-        <Slider label="Brillo" value={adj.brightness} onChange={(brightness) => update({ brightness })} />
-        <Slider label="Contraste" value={adj.contrast} onChange={(contrast) => update({ contrast })} />
+        <div className="h-[132px] px-4">
+          {tab === 'filters' ? (
+            <div className="flex justify-center gap-3">
+              {FILTERS.map((f) => (
+                <FilterThumb
+                  key={f.value}
+                  source={source}
+                  filter={f.value}
+                  rotation={adj.rotation}
+                  label={f.label}
+                  selected={adj.filter === f.value}
+                  onSelect={() => update({ filter: f.value })}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4 pt-2">
+              <Slider icon={Sun} label="Brillo" value={adj.brightness} onChange={(brightness) => update({ brightness })} />
+              <Slider icon={Contrast} label="Contraste" value={adj.contrast} onChange={(contrast) => update({ contrast })} />
+            </div>
+          )}
+        </div>
 
-        <div className="flex justify-center gap-2 text-sm">
-          <button onClick={() => update({ rotation: rotate(adj.rotation, 'left') })} className="rounded-lg bg-white/15 px-3 py-2" aria-label="Rotar a la izquierda">
-            ⟲ Rotar
-          </button>
-          <button onClick={() => update({ rotation: rotate(adj.rotation, 'right') })} className="rounded-lg bg-white/15 px-3 py-2" aria-label="Rotar a la derecha">
-            Rotar ⟳
-          </button>
-          <Link to={`/doc/${id}/page/${pageId}/crop`} replace className="rounded-lg bg-white/15 px-3 py-2">
-            Recortar
-          </Link>
-          <button onClick={() => setAdj(DEFAULT_ADJUSTMENTS)} className="rounded-lg bg-white/15 px-3 py-2">
-            Restablecer
-          </button>
+        <div className="mt-1 flex justify-center gap-2 border-t border-white/5 px-2 pt-2">
+          <ToolButton icon={RotateCcw} label="Rotar izq." onClick={() => update({ rotation: rotate(adj.rotation, 'left') })} />
+          <ToolButton icon={RotateCw} label="Rotar der." onClick={() => update({ rotation: rotate(adj.rotation, 'right') })} />
+          <ToolButton icon={Crop} label="Recortar" onClick={() => navigate(`/doc/${id}/page/${pageId}/crop`, { replace: true })} />
+          <ToolButton icon={Undo2} label="Restablecer" onClick={() => setAdj(DEFAULT_ADJUSTMENTS)} />
         </div>
       </div>
     </div>
   )
 }
 
-function Slider({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+interface FilterThumbProps {
+  source: ImageBitmap | null
+  filter: PageFilter
+  rotation: PageAdjustments['rotation']
+  label: string
+  selected: boolean
+  onSelect: () => void
+}
+
+/** Miniatura con la vista previa real del filtro. */
+function FilterThumb({ source, filter, rotation, label, selected, onSelect }: FilterThumbProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!source || !canvasRef.current) return
+    renderToCanvas(source, { filter, rotation, brightness: 0, contrast: 0 }, canvasRef.current, FILTER_THUMB_SIDE)
+  }, [source, filter, rotation])
+
+  return (
+    <button onClick={onSelect} aria-pressed={selected} className="flex w-[72px] flex-col items-center gap-1.5">
+      <span
+        className={`flex h-24 w-[72px] items-center justify-center overflow-hidden rounded-xl bg-white/5 transition-shadow ${
+          selected ? 'ring-[3px] ring-sky-400' : 'ring-1 ring-white/10'
+        }`}
+      >
+        <canvas ref={canvasRef} className="max-h-full max-w-full object-contain" />
+      </span>
+      <span className={`text-xs font-medium ${selected ? 'text-sky-300' : 'text-white/70'}`}>{label}</span>
+    </button>
+  )
+}
+
+interface SliderProps {
+  icon: LucideIcon
+  label: string
+  value: number
+  onChange: (v: number) => void
+}
+
+function Slider({ icon: Icon, label, value, onChange }: SliderProps) {
   return (
     <label className="flex items-center gap-3 text-sm">
+      <Icon size={18} className="shrink-0 text-white/60" aria-hidden />
       <span className="w-20 text-white/80">{label}</span>
       <input
         type="range"
@@ -136,9 +191,9 @@ function Slider({ label, value, onChange }: { label: string; value: number; onCh
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         onDoubleClick={() => onChange(0)}
-        className="flex-1 accent-blue-500"
+        className="flex-1 accent-sky-400"
       />
-      <span className="w-8 text-right tabular-nums text-white/60">{value}</span>
+      <span className="w-9 text-right text-white/60 tabular-nums">{value > 0 ? `+${value}` : value}</span>
     </label>
   )
 }

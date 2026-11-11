@@ -61,8 +61,8 @@ export function CornerEditor({ imageUrl, imageWidth, imageHeight, corners, onCha
                 <polygon points={polygon} fill="black" />
               </mask>
             </defs>
-            <rect width="100%" height="100%" fill="rgba(0,0,0,0.45)" mask="url(#crop-mask)" />
-            <polygon points={polygon} fill="rgba(37,99,235,0.12)" stroke="#3b82f6" strokeWidth={2} />
+            <rect width="100%" height="100%" fill="rgba(2,6,23,0.55)" mask="url(#crop-mask)" />
+            <polygon points={polygon} fill="rgba(51,132,252,0.14)" stroke="#59a5ff" strokeWidth={2} />
           </svg>
 
           {corners.map((p, i) => (
@@ -78,7 +78,7 @@ export function CornerEditor({ imageUrl, imageWidth, imageHeight, corners, onCha
               onPointerMove={(e) => handlePointerMove(i, e)}
               onPointerUp={() => setDragging(null)}
               onPointerCancel={() => setDragging(null)}
-              className="absolute rounded-full border-[3px] border-white bg-blue-600/80 shadow-md"
+              className="absolute rounded-full border-[3px] border-white bg-brand-500/80 shadow-lg shadow-black/40"
               style={{
                 width: HANDLE_SIZE,
                 height: HANDLE_SIZE,
