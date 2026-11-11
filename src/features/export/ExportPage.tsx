@@ -13,9 +13,9 @@ import { exportJpgs, exportPdf } from '../../infrastructure/pdf/exportDocument'
 import { canShareFiles, downloadFile, shareFiles } from '../../shared/shareFiles'
 
 const PAPER_OPTIONS: { value: PaperSize; label: string }[] = [
+  { value: 'fit', label: 'Ajustado' },
   { value: 'a4', label: 'A4' },
   { value: 'letter', label: 'Carta' },
-  { value: 'fit', label: 'Ajustado' },
 ]
 
 const QUALITY_OPTIONS: { value: ExportQuality; label: string }[] = [

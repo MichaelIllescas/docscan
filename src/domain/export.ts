@@ -6,7 +6,7 @@ export interface ExportOptions {
   quality: ExportQuality
 }
 
-export const DEFAULT_EXPORT_OPTIONS: ExportOptions = { paper: 'a4', quality: 'medium' }
+export const DEFAULT_EXPORT_OPTIONS: ExportOptions = { paper: 'fit', quality: 'medium' }
 
 /** Tamaños en puntos PDF (1 pt = 1/72 pulgada), orientación vertical. */
 export const PAPER_SIZES: Record<Exclude<PaperSize, 'fit'>, { width: number; height: number }> = {
@@ -34,12 +34,12 @@ export interface PdfPageLayout {
 }
 
 /**
- * Calcula la página y dónde va la imagen. El papel gira para coincidir con la orientación de la
- * imagen, y la imagen se escala para entrar completa, centrada, sin deformarse.
+ * Calcula la página y dónde va la imagen.
+ * - "fit": la hoja toma la proporción de la imagen (sin bordes).
+ * - A4/Carta: hoja siempre vertical, para que todas midan igual; la imagen entra completa,
+ *   centrada y sin deformarse (puede quedar margen blanco).
  */
 export function layoutPdfPage(imageWidth: number, imageHeight: number, paper: PaperSize): PdfPageLayout {
-  const landscape = imageWidth > imageHeight
-
   if (paper === 'fit') {
     const scale = FIT_LONG_SIDE / Math.max(imageWidth, imageHeight)
     const width = imageWidth * scale
@@ -47,9 +47,7 @@ export function layoutPdfPage(imageWidth: number, imageHeight: number, paper: Pa
     return { pageWidth: width, pageHeight: height, x: 0, y: 0, width, height }
   }
 
-  const base = PAPER_SIZES[paper]
-  const pageWidth = landscape ? base.height : base.width
-  const pageHeight = landscape ? base.width : base.height
+  const { width: pageWidth, height: pageHeight } = PAPER_SIZES[paper]
   const scale = Math.min(pageWidth / imageWidth, pageHeight / imageHeight)
   const width = imageWidth * scale
   const height = imageHeight * scale

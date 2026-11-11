@@ -25,6 +25,7 @@ describe('buildPdf', () => {
     expect(pdf.getTitle()).toBe('Prueba')
     const [first, second] = pdf.getPages()
     expect(first.getWidth()).toBeLessThan(first.getHeight())
-    expect(second.getWidth()).toBeGreaterThan(second.getHeight())
+    expect(second.getWidth()).toBeCloseTo(first.getWidth())
+    expect(second.getHeight()).toBeCloseTo(first.getHeight())
   })
 })

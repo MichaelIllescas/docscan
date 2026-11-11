@@ -11,10 +11,13 @@ describe('export domain', () => {
     expect(l.y).toBeCloseTo(0)
   })
 
-  it('gira el papel para imágenes horizontales', () => {
+  it('mantiene la hoja vertical aunque la imagen sea horizontal', () => {
     const l = layoutPdfPage(2000, 1000, 'letter')
-    expect(l.pageWidth).toBe(792)
-    expect(l.pageHeight).toBe(612)
+    expect(l.pageWidth).toBe(612)
+    expect(l.pageHeight).toBe(792)
+    expect(l.width).toBeCloseTo(612)
+    expect(l.height).toBeCloseTo(306)
+    expect(l.y).toBeCloseTo((792 - 306) / 2)
   })
 
   it('en modo ajustado la página tiene la proporción de la imagen', () => {
